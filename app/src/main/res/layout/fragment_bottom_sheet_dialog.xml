@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:gravity="center_horizontal"
+        app:behavior_peekHeight="250dp">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Province"
+            android:textSize="25sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/last_updated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Updated as of DATE"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title" />
+
+        <TextView
+            android:id="@+id/lblTotalCases"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="64dp"
+            android:layout_marginTop="16dp"
+            android:text="Total Cases:"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/last_updated" />
+
+        <TextView
+            android:id="@+id/lblDeaths"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Total Deaths:"
+            app:layout_constraintEnd_toEndOf="@+id/lblTotalCases"
+            app:layout_constraintTop_toBottomOf="@+id/lblTotalCases" />
+
+        <TextView
+            android:id="@+id/lblRecoveries"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Total Recoveries:"
+            app:layout_constraintEnd_toEndOf="@+id/lblDeaths"
+            app:layout_constraintTop_toBottomOf="@+id/lblDeaths" />
+
+        <TextView
+            android:id="@+id/lblVaccinated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Total Vaccinations:"
+            app:layout_constraintEnd_toEndOf="@+id/lblRecoveries"
+            app:layout_constraintTop_toBottomOf="@+id/lblRecoveries" />
+
+        <TextView
+            android:id="@+id/txtTotalCases"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="128dp"
+            android:text="0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/lblTotalCases" />
+
+        <TextView
+            android:id="@+id/txtTotalDeaths"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="0"
+            app:layout_constraintStart_toStartOf="@+id/txtTotalCases"
+            app:layout_constraintTop_toBottomOf="@+id/txtTotalCases" />
+
+        <TextView
+            android:id="@+id/txtRecoveries"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="0"
+            app:layout_constraintStart_toStartOf="@+id/txtTotalDeaths"
+            app:layout_constraintTop_toBottomOf="@+id/txtTotalDeaths" />
+
+        <TextView
+            android:id="@+id/txtVaccinated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="0"
+            app:layout_constraintStart_toStartOf="@+id/txtRecoveries"
+            app:layout_constraintTop_toBottomOf="@+id/txtRecoveries" />
+
+        <com.mikhaellopez.circularprogressbar.CircularProgressBar
+            android:id="@+id/pbProgress"
+            android:layout_width="146dp"
+            android:layout_height="145dp"
+            app:cpb_background_progressbar_color="#CDCDCD"
+            app:cpb_background_progressbar_width="5dp"
+            app:layout_constraintBottom_toTopOf="@+id/lblPercent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lblVaccinated"
+            app:cpb_progressbar_color="#5FF436"
+            app:cpb_progressbar_width="10dp"
+            app:cpb_round_border="true"/>
+
+        <TextView
+            android:id="@+id/lblPercent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="Percentage Vaccinated"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/lblProgressPcnt"
+            android:layout_width="78dp"
+            android:layout_height="66dp"
+            android:gravity="center"
+            android:text="100"
+            android:textSize="40sp"
+            app:layout_constraintBottom_toBottomOf="@+id/pbProgress"
+            app:layout_constraintEnd_toEndOf="@+id/pbProgress"
+            app:layout_constraintStart_toStartOf="@+id/pbProgress"
+            app:layout_constraintTop_toTopOf="@+id/pbProgress" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

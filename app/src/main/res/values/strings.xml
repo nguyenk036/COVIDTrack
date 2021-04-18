@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">COVID Tracker</string>
+    <string name="mapbox_access_token">pk.eyJ1Ijoia25ndXllbjY2IiwiYSI6ImNra2x6ajhsczBwbjkyb3BkZXA5a2Zod2MifQ.Yo73n1vjyKkfUNv1u4LZqA</string>
+
+    <!-- Preference Titles -->
+    <string name="colour_accessability">Colour Settings</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="colour_title">Colourblind-friendly palette</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+</resources>
