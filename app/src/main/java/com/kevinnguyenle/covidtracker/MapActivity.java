@@ -4,7 +4,9 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
+import android.app.ActivityOptions;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -209,9 +211,18 @@ public class MapActivity extends AppCompatActivity {
 
             circleManager.create(circleOptionsList);
         }));
+
+
     }
 
     /** Override Methods**/
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(this, MainActivity.class), ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+    }
 
     @Override
     protected void onStart() {

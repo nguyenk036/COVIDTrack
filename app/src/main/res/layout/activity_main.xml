@@ -10,6 +10,21 @@
     tools:context=".MainActivity">
 
     <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-condensed"
+        android:text="Sign Out"
+        android:transitionName="signin"
+        android:visibility="invisible"
+        app:backgroundTint="#7A7A7A"
+        app:cornerRadius="50dp"
+        app:layout_constraintEnd_toEndOf="@+id/btnRegister"
+        app:layout_constraintStart_toStartOf="@+id/btnRegister"
+        app:layout_constraintTop_toBottomOf="@+id/btnRegister" />
+
+    <Button
         android:id="@+id/btnRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -30,6 +45,7 @@
         android:layout_marginTop="64dp"
         android:adjustViewBounds="true"
         android:src="@drawable/covid"
+        android:transitionName="logo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/AppTitle" />
@@ -80,6 +96,7 @@
         android:layout_marginBottom="24dp"
         android:background="#00000000"
         android:scaleType="fitCenter"
+        android:transitionName="settings"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/btnContinue"
         app:layout_constraintStart_toStartOf="@+id/btnContinue"

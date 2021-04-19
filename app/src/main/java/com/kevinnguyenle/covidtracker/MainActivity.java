@@ -8,7 +8,10 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Pair;
+import android.view.View;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.kevinnguyenle.covidtracker.databinding.ActivityMainBinding;
 
 import static com.kevinnguyenle.covidtracker.utility.Utilities.setTransition;
@@ -22,6 +25,7 @@ import static com.kevinnguyenle.covidtracker.utility.Utilities.setTransition;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
+    private FirebaseUser user;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -31,7 +35,20 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
+        user = FirebaseAuth.getInstance().getCurrentUser();
         setContentView(binding.getRoot());
+
+        if (user != null) {
+            binding.btnRegister.setVisibility(View.INVISIBLE);
+            binding.btnLogin.setVisibility(View.INVISIBLE);
+            binding.btnContinue.setText("Go to map");
+            binding.btnLogout.setVisibility(View.VISIBLE);
+        } else {
+            binding.btnRegister.setVisibility(View.VISIBLE);
+            binding.btnLogin.setVisibility(View.VISIBLE);
+            binding.btnLogout.setVisibility(View.INVISIBLE);
+            binding.btnContinue.setText("Skip for now >>");
+        }
 
         binding.btnContinue.setOnClickListener(v -> startActivity(new Intent(this, MapActivity.class),
                                                     ActivityOptions.makeSceneTransitionAnimation(this).toBundle()));
@@ -48,5 +65,14 @@ public class MainActivity extends AppCompatActivity {
 
         binding.btnSettings.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class),
                                                     ActivityOptions.makeSceneTransitionAnimation(this).toBundle()));
+
+        binding.btnLogout.setOnClickListener(v -> {
+                FirebaseAuth.getInstance().signOut();
+                finish();
+                startActivity(getIntent(), ActivityOptions.makeSceneTransitionAnimation(this,
+                        Pair.create(binding.AppTitle, "title"),
+                        Pair.create(binding.imgLogo, "logo"),
+                        Pair.create(binding.btnSettings, "settings")).toBundle());
+        });
     }
 }
