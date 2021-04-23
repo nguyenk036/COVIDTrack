@@ -15,4 +15,5 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="user_location_permission_explanation">COVIDTrack is requesting user\'s current location.</string>
 </resources>

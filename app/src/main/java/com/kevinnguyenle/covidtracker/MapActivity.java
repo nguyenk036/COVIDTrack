@@ -1,9 +1,11 @@
 package com.kevinnguyenle.covidtracker;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
@@ -13,12 +15,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import com.google.gson.reflect.TypeToken;
+import com.mapbox.android.core.permissions.PermissionsListener;
+import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.Point;
@@ -26,7 +31,13 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
+import com.mapbox.mapboxsdk.location.LocationComponentOptions;
+import com.mapbox.mapboxsdk.location.modes.CameraMode;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.CircleManager;
 import com.mapbox.mapboxsdk.plugins.annotation.CircleOptions;
@@ -62,11 +73,13 @@ import static com.kevinnguyenle.covidtracker.utility.Utilities.yesterday;
  * MapActivity - Loads the Mapbox with GeoJSON data containing CircleOptions of provinces and their
  *               COVID statistical data
  */
-public class MapActivity extends AppCompatActivity {
+public class MapActivity extends AppCompatActivity implements PermissionsListener {
 
     private MapView mapView;
     private CircleManager circleManager;
+    private MapboxMap mapboxMap;
 
+    @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +93,9 @@ public class MapActivity extends AppCompatActivity {
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(mapboxMap -> mapboxMap.setStyle(Style.DARK, style -> {
+
+            this.mapboxMap = mapboxMap;
+            enableLocationComponent(style);
 
             List<CircleOptions> circleOptionsList = new ArrayList<>();
             List<JsonObject> provincesList = null;
@@ -211,8 +227,40 @@ public class MapActivity extends AppCompatActivity {
 
             circleManager.create(circleOptionsList);
         }));
+    }
 
+    @SuppressLint("MissingPermission")
+    private void enableLocationComponent(@NonNull Style loadedMapStyle) {
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
 
+            LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(this)
+                    .foregroundTintColor(R.color.mapboxBlueLight)
+                    .backgroundTintColor(R.color.white)
+                    .pulseEnabled(true)
+                    .pulseSingleDuration(2500)
+                    .pulseAlpha(0.5f)
+                    .pulseMaxRadius(20)
+                    .build();
+
+            // Get an instance of the component
+            LocationComponent locationComponent = mapboxMap.getLocationComponent();
+
+            // Activate with options
+            locationComponent.activateLocationComponent(
+                    LocationComponentActivationOptions.builder(this, loadedMapStyle).locationComponentOptions(locationComponentOptions).build());
+
+            // Enable to make component visible
+            locationComponent.setLocationComponentEnabled(true);
+
+            // Set the component's camera mode
+            locationComponent.setCameraMode(CameraMode.TRACKING);
+
+            // Set the component's render mode
+            locationComponent.setRenderMode(RenderMode.NORMAL);
+        } else {
+            PermissionsManager permissionsManager = new PermissionsManager(this);
+            permissionsManager.requestLocationPermissions(this);
+        }
     }
 
     /** Override Methods**/
@@ -266,4 +314,18 @@ public class MapActivity extends AppCompatActivity {
         mapView.onDestroy();
     }
 
+    @Override
+    public void onExplanationNeeded(List<String> permissionsToExplain) {
+        Toast.makeText(this, R.string.user_location_permission_explanation, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onPermissionResult(boolean granted) {
+        if (granted) {
+            mapboxMap.getStyle(style -> enableLocationComponent(style));
+        } else {
+            Toast.makeText(this, "Location permissions denied.", Toast.LENGTH_LONG).show();
+            finish();
+        }
+    }
 }
