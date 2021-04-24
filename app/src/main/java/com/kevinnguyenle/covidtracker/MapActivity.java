@@ -11,17 +11,29 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import com.kevinnguyenle.covidtracker.databinding.ActivityMapBinding;
+import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.geojson.Feature;
@@ -39,10 +51,16 @@ import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.plugins.annotation.Circle;
 import com.mapbox.mapboxsdk.plugins.annotation.CircleManager;
 import com.mapbox.mapboxsdk.plugins.annotation.CircleOptions;
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
+import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.style.sources.Source;
+import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.mapboxsdk.utils.ColorUtils;
 
 import org.jetbrains.annotations.NotNull;
@@ -73,11 +91,17 @@ import static com.kevinnguyenle.covidtracker.utility.Utilities.yesterday;
  * MapActivity - Loads the Mapbox with GeoJSON data containing CircleOptions of provinces and their
  *               COVID statistical data
  */
-public class MapActivity extends AppCompatActivity implements PermissionsListener {
+public class MapActivity extends AppCompatActivity implements PermissionsListener, View.OnClickListener {
 
+    private static final String MAPBOX_MARKER = "marker";
     private MapView mapView;
     private CircleManager circleManager;
+    private SymbolManager symbolManager;
     private MapboxMap mapboxMap;
+    private ActivityMapBinding binding;
+    private FirebaseUser user;
+    private Symbol symbol;
+    private boolean showLastLocation = false;
 
     @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -88,14 +112,23 @@ public class MapActivity extends AppCompatActivity implements PermissionsListene
 
         super.onCreate(savedInstanceState);
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token));
-        setContentView(R.layout.activity_map);
+
+        binding = ActivityMapBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) { binding.fabMenu.setVisibility(View.GONE); }
+
+        binding.fabSaveLocation.setOnClickListener(this);
+        binding.fabContactLocations.setOnClickListener(this);
 
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(mapboxMap -> mapboxMap.setStyle(Style.DARK, style -> {
 
             this.mapboxMap = mapboxMap;
-            enableLocationComponent(style);
+
+            addMarkerImageToStyle(style);
 
             List<CircleOptions> circleOptionsList = new ArrayList<>();
             List<JsonObject> provincesList = null;
@@ -116,6 +149,11 @@ public class MapActivity extends AppCompatActivity implements PermissionsListene
             mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(position));
 
             circleManager = new CircleManager(mapView, mapboxMap, style);
+            symbolManager = new SymbolManager(mapView, mapboxMap, style);
+
+            if(settings.getBoolean("currentLocation", false)) { enableLocationComponent(style); }
+            if(user != null) { loadLastLocation(); }
+            boolean colourAssist = settings.getBoolean("colour", false);
 
             // For each circle that is clicked..
             circleManager.addClickListener(circle -> {
@@ -207,7 +245,6 @@ public class MapActivity extends AppCompatActivity implements PermissionsListene
                 // Obtain values from the returned JSON object to determine circle size and colour
                 JsonObject outerJsonObject = covidJson[0].getAsJsonObject();
                 JsonObject innerJsonObject = covidJson[0].getAsJsonObject().getAsJsonArray("data").get(0).getAsJsonObject();
-                boolean colourAssist = settings.getBoolean("colour", false);
                 float totalCases = innerJsonObject.get("total_cases").getAsFloat();
                 float radius = 15 + ((innerJsonObject.get("total_cases").getAsFloat() / outerJsonObject.get("population").getAsFloat()) * 500);
                 int strokeColor = Color.argb(255, 10, 10, 10);
@@ -229,6 +266,7 @@ public class MapActivity extends AppCompatActivity implements PermissionsListene
         }));
     }
 
+    // Enables current location - prompting user if permission not yet initialized
     @SuppressLint("MissingPermission")
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
@@ -257,13 +295,62 @@ public class MapActivity extends AppCompatActivity implements PermissionsListene
 
             // Set the component's render mode
             locationComponent.setRenderMode(RenderMode.NORMAL);
+
         } else {
             PermissionsManager permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(this);
         }
     }
 
+    // Loads the last saved location from the FirebaseDB for the current user
+    private void loadLastLocation() {
+        DatabaseReference db = FirebaseDatabase.getInstance().getReference("users/" + user.getUid()).child("LastLocation");
+
+        db.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Toast.makeText(MapActivity.this, "Unable to get contract tracing location from database.", Toast.LENGTH_LONG).show();
+            } else {
+                try {
+                    DataSnapshot locationSnapshot = task.getResult();
+                    double lat = (double) locationSnapshot.child("latitude").getValue();
+                    double lng = (double) locationSnapshot.child("longitude").getValue();
+
+                    SymbolOptions symbolOptions = new SymbolOptions()
+                            .withLatLng(new LatLng(lat, lng))
+                            .withIconImage(MAPBOX_MARKER)
+                            .withIconColor(ColorUtils.colorToRgbaString(Color.RED))
+                            .withIconSize(0.8f);
+
+                    symbolManager.setIconAllowOverlap(true);
+                    symbolManager.create(symbolOptions).setIconSize(0.0f);
+                    this.symbol = symbolManager.create(symbolOptions);
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Unable to obtain contact tracing information from database.", Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
+    }
+
+    private void addMarkerImageToStyle(Style style) {
+        style.addImage(MAPBOX_MARKER, BitmapUtils.getBitmapFromDrawable(getResources()
+                        .getDrawable(R.drawable.mapbox_marker_icon_default)), true);
+    }
+
     /** Override Methods**/
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.fabSaveLocation) {
+            Location currentLocation = mapboxMap.getLocationComponent().getLastKnownLocation();
+            DatabaseReference db = FirebaseDatabase.getInstance().getReference("users/" + user.getUid());
+            db.child("LastLocation").setValue(currentLocation);
+
+            Toast.makeText(MapActivity.this, "Current location saved to database for contract tracing.", Toast.LENGTH_LONG).show();
+        }
+    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -322,10 +409,12 @@ public class MapActivity extends AppCompatActivity implements PermissionsListene
     @Override
     public void onPermissionResult(boolean granted) {
         if (granted) {
-            mapboxMap.getStyle(style -> enableLocationComponent(style));
+            mapboxMap.getStyle(this::enableLocationComponent);
         } else {
             Toast.makeText(this, "Location permissions denied.", Toast.LENGTH_LONG).show();
             finish();
         }
     }
+
+
 }
