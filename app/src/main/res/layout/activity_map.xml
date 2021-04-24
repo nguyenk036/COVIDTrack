@@ -29,8 +29,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabContactLocations"
+        <com.getbase.floatingactionbutton.AddFloatingActionButton
+            android:id="@+id/fabSaveLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
@@ -39,16 +39,7 @@
             android:src="@drawable/mapbox_marker_icon_default"
             app:fab_colorNormal="@color/white"
             app:fab_colorPressed="@color/white_pressed"
-            app:fab_size="mini"
-            app:fab_title="Show Contact Trace Locations" />
-
-        <com.getbase.floatingactionbutton.AddFloatingActionButton
-            android:id="@+id/fabSaveLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fab_colorNormal="@color/white"
-            app:fab_colorPressed="@color/white_pressed"
-            app:fab_plusIconColor="#2C96C6"
+            app:fab_plusIconColor="@color/COVIDTrackTheme"
             app:fab_size="mini"
             app:fab_title="Save Current Location" />
 

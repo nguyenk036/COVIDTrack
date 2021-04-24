@@ -117,10 +117,8 @@ public class MapActivity extends AppCompatActivity implements PermissionsListene
         setContentView(binding.getRoot());
 
         user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) { binding.fabMenu.setVisibility(View.GONE); }
 
         binding.fabSaveLocation.setOnClickListener(this);
-        binding.fabContactLocations.setOnClickListener(this);
 
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -153,6 +151,7 @@ public class MapActivity extends AppCompatActivity implements PermissionsListene
 
             if(settings.getBoolean("currentLocation", false)) { enableLocationComponent(style); }
             if(user != null) { loadLastLocation(); }
+            if (user == null || settings.getBoolean("currentLocation", false) == false) { binding.fabMenu.setVisibility(View.GONE); }
             boolean colourAssist = settings.getBoolean("colour", false);
 
             // For each circle that is clicked..
