@@ -4,8 +4,8 @@
 
 ---
 
-Features
----
+# Features
+
 - COVID-19 data consumed from public API and visualized on a interactive map for mobile devices
 - Interactive map 
   - each province includes case count, deaths, recoveries and vaccination count
@@ -17,6 +17,15 @@ Features
   - Login authentication via Firebase authentication
   - Save current location for contact tracing purposes
   - Data stored to a Firebase back-end
-- Accessability settings to accommodate colour-blindness
+- Accessibility settings to accommodate colour-blindness
 
 ---
+
+<h3 align="center">Home Screen</h3>
+<p align="center"><img src="AppDemo_1.gif" alt="login demo" /></p>
+
+<h3 align="center">Map Interaction</h3>
+<p align="center"><img src="AppDemo_2.gif" alt="map demo" /></p>
+
+<h3 align="center">Accessibility & Current Location Tracking</h3>
+<p align="center"><img src="AppDemo_3.gif" alt="settings demo" /></p>
