@@ -1,6 +1,6 @@
 <h1 align="center">COVIDTrack</h1>
 
-View up-to-date COVID-19 statistics by Canadian province, using an interactive map with colour identified clusters to indicate COVID-19 case severity in each province.
+<h4 align="center">Access and view data-visualized Canadian COVID-19 statistics using your Android mobile device.</h4>
 
 ---
 
@@ -14,9 +14,9 @@ Features
   - clusters range in size to represent the ratio of COVID-19 cases to population count
 - Population vaccination percentage represented by an easy to visualize progression bar
 - User account creation & login
-  - Accounts created saved to a Firebase database
   - Login authentication via Firebase authentication
   - Save current location for contact tracing purposes
+  - Data stored to a Firebase back-end
 - Accessability settings to accommodate colour-blindness
 
 ---
