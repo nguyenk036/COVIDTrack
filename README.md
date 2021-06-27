@@ -29,3 +29,10 @@
 
 <h3 align="center">Accessibility & Current Location Tracking</h3>
 <p align="center"><img src="AppDemo_3.gif" alt="settings demo" /></p>
+
+---
+
+<h3>Credits</h3>
+
+<h5>API Source</h5>
+<p>https://api.covid19tracker.ca/docs/1.0/overview</p>
